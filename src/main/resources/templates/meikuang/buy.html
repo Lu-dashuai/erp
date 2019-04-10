@@ -19,9 +19,9 @@
 <div id="tableView">
     <!--列表顶部搜索和工具条-->
     <el-row>
-            <el-button type="success" icon="el-icon-circle-plus-outline" @click="addClick">新增</el-button>
-            <el-button type="success" icon="el-icon-refresh" @click="toPush">刷新</el-button>
-            </el-form-item>
+        <el-button type="success" icon="el-icon-circle-plus-outline" @click="addClick">新增</el-button>
+        <el-button type="success" icon="el-icon-refresh" @click="toPush">刷新</el-button>
+        </el-form-item>
         </el-form>
     </el-row>
     <!--列表-->
@@ -42,6 +42,16 @@
                     align="center">
             </el-table-column>
             <el-table-column
+                    prop="b_name"
+                    label="购买设备名称"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="e_id"
+                    label="设备编号"
+                    align="center">
+            </el-table-column>
+            <el-table-column
                     prop="price"
                     label="设备购买价格"
                     align="center">
@@ -56,6 +66,16 @@
                     label="购买时间"
                     sortable
                     width="180"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="num"
+                    label="数量"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="z_price"
+                    label="总金额"
                     align="center">
             </el-table-column>
             <el-table-column
@@ -91,21 +111,39 @@
     <!--编辑界面-->
     <el-dialog title="编辑" :visible.sync="editFormVisible" :close-on-click-modal="false">
         <el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
-            <el-form-item label="购买价格" prop="price">
-                <el-input v-model="editForm.price" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="设备厂商" prop="equ_vendor">
-                <el-input v-model="editForm.equ_vendor" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="购买时间" prop="buy_time">
-                <el-date-picker
-                        type="datetime"
-                        placeholder="选择日期"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        v-model="editForm.buy_time"
-                >
-                </el-date-picker>
-            </el-form-item>
+            <el-row :gutter="6">
+                <el_col :span="8">
+                    <el-form-item label="设备名称" prop="b_name">
+                        <el-input v-model="editForm.b_name" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="设备编号" prop="e_id">
+                        <el-input v-model="editForm.e_id" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="设备厂商" prop="equ_vendor">
+                        <el-input v-model="editForm.equ_vendor" auto-complete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="购买时间" prop="buy_time">
+                        <el-date-picker
+                                type="datetime"
+                                placeholder="选择日期"
+                                value-format="yyyy-MM-dd HH:mm:ss"
+                                v-model="editForm.buy_time"
+                        >
+                        </el-date-picker>
+                    </el-form-item>
+                </el_col>
+                <el_col :span="8">
+                    <el-form-item label="购买价格" prop="price" id="price">
+                        <el-input v-model="editForm.price" auto-complete="off" type="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数量"  prop="num" id="num">
+                        <el-input-number v-model="editForm.num" @change="handleChange" :min="1" :max="100" label="最大输入100" ></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="总金额" prop="z_price" id="zje">
+                        <el-input v-model="editForm.z_price" auto-complete="off" type="number" ></el-input>
+                    </el-form-item>
+                </el_col>
+            </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click.native="editFormVisible = false">取消</el-button>
@@ -168,16 +206,19 @@
             //编辑界面数据
             editForm: {
                 id:'',
+                b_name:'',
+                e_id:'',
                 price:'',
                 equ_vendor:'',
-                buy_time:''
+                buy_time:'',
+                num:'',
+                z_price:''
             },
         },
         //列表显示
         created:function(){
             //在 then的内部不能使用Vue的实例化的this, 因为在内部 this 没有被绑定。
             var self = this;
-            //var time = $('#time').val();
             axios.post('/buy/getBuyListBy',{'pageNo':self.currentPage,'pageSize':self.pageSize}).then(function(response){
                 self.total=response.data.total;
                 self.tableData = response.data.pageData;
@@ -191,10 +232,14 @@
             //清空表格数据
             toPush: function () {
                 this.searchForm = {
-                    id: '',
-                    price: '',
-                    equ_vendor: '',
-                    buy_time: ''
+                    id:'',
+                    b_name:'',
+                    e_id:'',
+                    price:'',
+                    equ_vendor:'',
+                    buy_time:'',
+                    num:'',
+                    z_price:''
                 }
                 this.loadingData();//重新加载数据
             },
@@ -250,13 +295,29 @@
             addClick: function () {
                 this.goUrl = "/buy/toBuyAdd";
                 var _self = this;
+                /* var price = $('#price').val();
+                 var num = $('#num').val();
+                 var z_price = $('#zje').val();*/
                 //清空url，解决先点更新，点取消，后点添加的是带这条数据的Bug
+                alert("1:"+JSON.stringify(this.editForm.price))
+                alert("2:"+JSON.stringify(this.editForm.num))
+                /*if (z_price ==''){
+                     z_price = price * num;
+                    _self.tableData[i].z_price=z_price;
+                }*/
                 this.editForm = {
-                    id: '',
-                    price: '',
-                    equ_vendor: '',
-                    buy_time: ''
+                    id:'',
+                    b_name:'',
+                    e_id:'',
+                    price:'',
+                    equ_vendor:'',
+                    buy_time:'',
+                    num:'',
+                    z_price:''
                 }
+                alert("3:"+JSON.stringify(this.editForm.price))
+                alert("4:"+JSON.stringify(this.editForm.num))
+
                 this.editFormVisible = true;
                 _self.loadingData();//重新加载数据
             },
