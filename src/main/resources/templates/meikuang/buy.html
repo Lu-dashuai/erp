@@ -19,8 +19,8 @@
 <div id="tableView">
     <!--列表顶部搜索和工具条-->
     <el-row>
-            <el-button type="success" icon="plus" @click="addClick">新增</el-button>
-            <el-button type="success" icon="plus" @click="toPush">刷新</el-button>
+            <el-button type="success" icon="el-icon-circle-plus-outline" @click="addClick">新增</el-button>
+            <el-button type="success" icon="el-icon-refresh" @click="toPush">刷新</el-button>
             </el-form-item>
         </el-form>
     </el-row>
@@ -54,6 +54,7 @@
             <el-table-column
                     prop="buy_time"
                     label="购买时间"
+                    sortable
                     width="180"
                     align="center">
             </el-table-column>
@@ -61,8 +62,8 @@
                     label="操作"
                     align="center">
                 <template scope="scope">
-                    <el-button :plain="true" type="success" size="small" icon="edit" @click="editClick(scope.row)">编辑</el-button>
-                    <el-button :plain="true" type="danger" size="small" icon="delete" @click="deleteClick(scope.row)">删除</el-button>
+                    <el-button :plain="true" type="success" size="small" icon="el-icon-edit" @click="editClick(scope.row)">编辑</el-button>
+                    <el-button :plain="true" type="danger" size="small" icon="el-icon-delete" @click="deleteClick(scope.row)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -71,7 +72,7 @@
     <!--列表底部工具条和分页符-->
     <el-row style="margin-top: 20px" type="flex" justify="end">
         <el-col :span="6" >
-            <el-button :plain="true" type="danger" size="small" icon="delete" @click="removeSelection">删除所选</el-button>
+            <el-button :plain="true" type="danger" size="small" icon="el-icon-remove-outline" @click="removeSelection">删除所选</el-button>
         </el-col>
         <el-col :span="18" >
             <el-pagination
@@ -180,13 +181,10 @@
             axios.post('/buy/getBuyListBy',{'pageNo':self.currentPage,'pageSize':self.pageSize}).then(function(response){
                 self.total=response.data.total;
                 self.tableData = response.data.pageData;
-               // alert(self.tableData.length)
                 for (var i = 0; i <self.tableData.length; i++) {
                     var buy_time = this.timeFormat(self.tableData[i].buy_time);
                     self.tableData[i].buy_time = buy_time;
                 }
-                //if(time =="")
-               // alert(JSON.stringify(response.data.pageData))
             })
         },
         methods: {
@@ -198,24 +196,20 @@
                     equ_vendor: '',
                     buy_time: ''
                 }
-                //alert('刷新');
                 this.loadingData();//重新加载数据
             },
             //表格重新加载数据
             loadingData: function () {
                 //在 then的内部不能使用Vue的实例化的this, 因为在内部 this 没有被绑定。
-                var self = this;
-                //var time = $('#time').val();
-                axios.post('/buy/getBuyListBy',{'pageNo':self.currentPage,'pageSize':self.pageSize}).then(function(response){
-                    self.total=response.data.total;
-                    self.tableData = response.data.pageData;
-                    // alert(self.tableData.length)
-                    for (var i = 0; i <self.tableData.length; i++) {
-                        var buy_time = this.timeFormat(self.tableData[i].buy_time);
-                        self.tableData[i].buy_time = buy_time;
+                var _self = this;
+                _self.loading=true;
+                axios.post('/buy/getBuyListBy',{'pageNo':_self.currentPage,'pageSize':_self.pageSize}).then(function(response){
+                    _self.total=response.data.total;
+                    _self.tableData = response.data.pageData;
+                    for (var i = 0; i <_self.tableData.length; i++) {
+                        var buy_time = this.timeFormat(_self.tableData[i].buy_time);
+                        _self.tableData[i].buy_time = buy_time;
                     }
-                    //if(time =="")
-                    // alert(JSON.stringify(response.data.pageData))
                 })
                 //console.log(_self.currentPage);
                 //查
@@ -228,9 +222,8 @@
             editClick: function (row) {
                 this.goUrl = "/buy/toBuyUpdate";
                 this.editFormVisible = true;
-                //alert(Object.assign({}, row));
                 this.editForm = Object.assign({}, row);
-                _self.loadingData();//重新加载数据
+                this.loadingData();//重新加载数据
             },
             //表格删除事件
             deleteClick: function (row) {
@@ -240,13 +233,11 @@
                 }).then(function () {
                     var url = "/buy/toBuyDelete";
                     axios.post(url, {id: row.id}).then(function (response) {
-                        //alert(response.data);
                         if (response.data > 0) {
                             _self.$message({
                                 message: row.id + '删除成功',
                                 type: 'success'
                             });
-                            //alert("111");
                             _self.loadingData();//重新加载数据
                         }
                     });
@@ -292,14 +283,13 @@
                 var ids = '';
                 for (var i = 0; i < multipleSelection.length; i++) {
                     var row = multipleSelection[i];
-                    ids += row.dept_id + ","
+                    ids += row.id+ ","
                 }
                 this.$confirm('确认删除' + ids + '吗?', '提示', {
                     type: 'warning'
                 }).then(function () {
                     var url = "/buy/batchDel";
                     axios.post(url, {ids: ids}).then(function (response) {
-                        //alert(response.data);
                         var temp = "";
                         if (response.data > 0) {
                             temp = "删除成功";
@@ -334,21 +324,22 @@
             editSubmit: function () {
                 var editForm = this.editForm;
                 var self = this;
-                alert(JSON.stringify(editForm));
                 axios.post(self.goUrl,editForm).then(function(response){
-                    //alert(JSON.stringify(response));
                     if (response.data==1){
-                        alert("成功！");
+                        self.$message({
+                            message: "保存成功",
+                            type: 'success'
+                        });
                         self.editFormVisible = false;
                         self.loadingData();//重新加载数据
                     } else {
-                        alert("失败！");
+                        alert("error submit!!");
                     }
                 })
-
             }
         }
     })
+    //时间更改插入信息
     function timeFormat(time) {
         var buy_time = time;
         var date = new Date(buy_time)
