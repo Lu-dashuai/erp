@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?> <!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.qy.dao.EquipmentDao">
+    <select id="EquipmentListBy" resultType="map">
+        select e.id,e.equ_id,e.equ_name,e.equ_vendor,e.other,b.price from
+        equipment e
+        join buy b
+        on e.equ_id=b.e_id
+        <where>
+            <if test="equ_id != null and equ_id !=''">
+                and equ_id = #{equ_id}
+            </if>
+        </where>
+    </select>
+    <insert id="EquipmentAdd" >
+        insert into equipment VALUES (null,#{equ_id},#{equ_name},#{equ_vendor},#{other},#{price})
+    </insert>
+    <update id="EquipmentUpdate">
+        update equipment set
+        equ_id=#{equ_id},
+        equ_name=#{equ_name},
+        equ_vendor=#{equ_vendor},
+        other=#{other}
+        where
+        id=#{id}
+    </update>
+    <delete id="EquipmentDelete">
+        delete from equipment where id = #{id}
+    </delete>
+    <delete id="EquipmentDel">
+        delete from equipment where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

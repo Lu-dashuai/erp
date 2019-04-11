@@ -21,6 +21,9 @@
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
         <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+
+        <script type="text/javascript" src="../js/vue.js"></script>
+        <script type="text/javascript" src="../js/axios.min.js"></script>
         <style>
             body{
                 background-size:cover;
@@ -50,22 +53,26 @@
                         <div class="form-top">
                             <div class="form-top-left">
                                 <h3>后台登录</h3>
+                                <h5 v-if="abc"><p v-model="error"></p></h5>
+                                <a class="btn btn-link-2" href="/fowardUser/toFowardUser">
+                                    <i class="fa fa-twitter"></i> 用户注册
+                                </a>
                             </div>
                             <div class="form-top-right">
                                 <i class="fa fa-lock"></i>
                             </div>
                         </div>
-                        <div class="form-bottom">
-                            <form role="form" action="/power/toLogin" method="post" class="login-form" onsubmit="return check()">
+                        <div class="form-bottom" id="app">
+                            <form role="form"  method="post" class="login-form" onsubmit="return check()">
                                 <div class="form-group">
-                                    <label class="sr-only">Username</label>
-                                    <input type="text" name="userName" placeholder="用户名" class="form-username form-control" id="userName">
+                                    <label class="sr-only">账户</label>
+                                    <input type="text" name="username" v-model="username" placeholder="用户名" class="form-username form-control" id="userName">
                                 </div>
                                 <div class="form-group">
-                                    <label class="sr-only">Password</label>
-                                    <input type="password" name="passWord" placeholder="密码" class="form-password form-control" id="passWord">
+                                    <label class="sr-only">密码</label>
+                                    <input type="password" name="password" v-model="password" placeholder="密码" class="form-password form-control" id="passWord">
                                 </div>
-                                <button type="submit" class="btn">Sign in!</button>
+                                <button type="button" class="btn" @click="toLogin">Sign in!</button>
                             </form>
                         </div>
                     </div>
@@ -84,16 +91,43 @@
     </body>
 <script>
     function check(){
-        var userName = $("#userName").val();
-        var passWord = $("#passWord").val();
-        if(userName == "" ){
+        var username = $("#userName").val();
+        var password = $("#passWord").val();
+        if(username == "" ||password == ""){
             alert("请将表单填写完整!");
-            return false;
-        }
-        if(passWord == ""){
-            alert("请将表单填写完整!");
-            return false;
         }
     }
+    new Vue({
+        el:'#app',
+        date:{
+            username:"",
+            password:"",
+            abc:false,
+            error:""
+        },
+        methods:{
+            toLogin:function(){
+                //alert(this.username)
+                var self = this;
+                axios.post('/power/userLogin',{'username':self.username,'password':self.password}).then(function(response){
+                    //alert(1111);
+                    var msg = response.data;
+                    alert(JSON.stringify(response.data))
+                    if (msg == 1){
+                        location.href="/dept/toDept";
+                    } else if (msg == 2){
+                        alert("用户名不存在")
+                        location.href="/power/toLogin";
+                    } else if (msg == 3){
+                        alert("用户名和密码错误")
+                        location.href="/power/toLogin";
+                    } else {
+                        alert("weizhiyichang")
+                        location.href="/power/toLogin";
+                    }
+                })
+            }
+        }
+    });
 </script>
 </html>
