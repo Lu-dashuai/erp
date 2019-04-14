@@ -19,9 +19,24 @@
 <div id="tableView">
     <!--列表顶部搜索和工具条-->
     <el-row>
-        <el-button type="success" icon="el-icon-circle-plus-outline" @click="addClick">新增</el-button>
-        <el-button type="success" icon="el-icon-refresh" @click="toPush">刷新</el-button>
-        </el-form-item>
+        <el-form :inline="true" :model="searchForm" class="demo-form-inline">
+            <el-form-item label="设备编号查询">
+                <template>
+                    <el-select v-model="searchForm.e_id" clearable placeholder="请选择">
+                        <el-option
+                                v-for="item in tableData"
+                                :key="item.e_id"
+                                :label="item.e_id"
+                                :value="item.e_id">
+                        </el-option>
+                    </el-select>
+                </template>
+            </el-form-item>
+            <el-button type="primary"  @click="daoClick">导入<i class="el-icon-upload el-icon--right"></i></el-button>
+            <el-button type="primary" icon="el-icon-search" @click="searchClick">查询</el-button>
+            <el-button type="success" icon="el-icon-circle-plus-outline" @click="addClick">新增</el-button>
+            <el-button type="success" icon="el-icon-refresh" @click="toPush">刷新</el-button>
+            </el-form-item>
         </el-form>
     </el-row>
     <!--列表-->
@@ -84,6 +99,7 @@
                 <template scope="scope">
                     <el-button :plain="true" type="success" size="small" icon="el-icon-edit" @click="editClick(scope.row)">编辑</el-button>
                     <el-button :plain="true" type="danger" size="small" icon="el-icon-delete" @click="deleteClick(scope.row)">删除</el-button>
+                    <el-button :plain="true" type="primary" size="small" @click="daoClick(scope.row)">导入<i class="el-icon-upload el-icon--right"></i></el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -151,6 +167,27 @@
         </div>
     </el-dialog>
 
+    <!--导入界面-->
+    <el-dialog title="导入" :visible.sync="daoFormVisible" :close-on-click-modal="false">
+        <el-form :model="daoForm" label-width="90px" ref="daoForm" >
+            <el-form-item label="设备编号">
+                <el-input v-model="daoForm.e_id" auto-complete="off" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="设备名称">
+                <el-input v-model="daoForm.b_name" auto-complete="off" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="设备价格">
+                <el-input v-model="daoForm.price" auto-complete="off" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="设备厂商" >
+                <el-input v-model="daoForm.equ_vendor" auto-complete="off" :disabled="true"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click.native="daoFormVisible = false">取消</el-button>
+            <el-button type="success" @click.native="editSubmit()" :loading="editLoading">导入到设备列表</el-button>
+        </div>
+    </el-dialog>
 </div>
 
 
@@ -164,19 +201,15 @@
     var tableView = new Vue({
         el: '#tableView',
         data: {
-            //部门状态下拉框
-            deptnos:[{state:"开启"},{state:"关闭"}],
-            //部门下拉框
+            //下拉框
             options:[],
-            //角色下拉框
-            roles:[],
             //列表数据
             tableData: [],
             //显示加载中样式
             loading:false,
-            //搜索表单
+            //导入表单
             searchForm: {
-                d_name: ''
+                e_id:''
             },
             //多选值
             multipleSelection: [],
@@ -190,6 +223,9 @@
             deleteVisible:false,
             //编辑界面是否显示
             editFormVisible: false,
+            //导入界面是否显示
+            daoFormVisible: false,
+            //加载刷新界面是否显示
             editLoading: false,
             goUrl:'',
             editFormRules: {
@@ -214,6 +250,13 @@
                 num:'',
                 z_price:''
             },
+            daoForm:{
+                id:'',
+                b_name:'',
+                e_id:'',
+                price:'',
+                equ_vendor:''
+            },
         },
         //列表显示
         created:function(){
@@ -226,6 +269,10 @@
                     var buy_time = this.timeFormat(self.tableData[i].buy_time);
                     self.tableData[i].buy_time = buy_time;
                 }
+            })
+            axios.post('/buy/getBuyList').then(function (res) {
+                self.optionsData = res.data;
+                //alert(JSON.stringify(res.data));
             })
         },
         methods: {
@@ -248,13 +295,23 @@
                 //在 then的内部不能使用Vue的实例化的this, 因为在内部 this 没有被绑定。
                 var _self = this;
                 _self.loading=true;
-                axios.post('/buy/getBuyListBy',{'pageNo':_self.currentPage,'pageSize':_self.pageSize}).then(function(response){
+                //传过去的参数
+                var searchForm={
+                    'pageNo':_self.currentPage,
+                    'pageSize':_self.pageSize,
+                    'E_id':_self.searchForm.e_id
+                };
+                axios.post('/buy/getBuyListBy',searchForm).then(function(response){
                     _self.total=response.data.total;
                     _self.tableData = response.data.pageData;
                     for (var i = 0; i <_self.tableData.length; i++) {
                         var buy_time = this.timeFormat(_self.tableData[i].buy_time);
                         _self.tableData[i].buy_time = buy_time;
                     }
+                })
+                axios.post('/buy/getBuyList',searchForm).then(function (res) {
+                    self.optionsData = res.data;
+                    alert(JSON.stringify(res.data));
                 })
                 //console.log(_self.currentPage);
                 //查
@@ -268,6 +325,14 @@
                 this.goUrl = "/buy/toBuyUpdate";
                 this.editFormVisible = true;
                 this.editForm = Object.assign({}, row);
+                this.loadingData();//重新加载数据
+            },
+            //导入查看事件
+            daoClick: function (row) {
+                this.goUrl = "/buy/toinsertBuy_Equ";
+                this.daoFormVisible = true;
+                alert(JSON.stringify(Object.assign({}, row)))
+                this.daoForm = Object.assign({}, row);
                 this.loadingData();//重新加载数据
             },
             //表格删除事件
@@ -321,6 +386,12 @@
                 this.editFormVisible = true;
                 _self.loadingData();//重新加载数据
             },
+            //表格导入事件
+            /*daoSubmit: function () {
+                this.goUrl = "/buy/toinsertBuy_Equ";
+                this.daoFormVisible = true;
+                _self.loadingData();//重新加载数据
+            },*/
             //表格查询事件
             searchClick: function () {
                 this.loadingData();//重新加载数据

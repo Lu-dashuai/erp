@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?> <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.erp.qy.dao.BuyDao">
+<mapper namespace="com.gongyongqin.demo.dao.BuyDao">
+    <select id="buyList" resultType="map">
+        select * from buy
+    </select>
     <select id="buyListBy" resultType="map">
         select * from buy
         <where>
-            <if test="id != null and id !=''">
-                and id = #{id}
+            <if test="E_id != null and E_id !=''">
+                and e_id = #{E_id}
             </if>
         </where>
     </select>
     <insert id="buyAdd" >
-       insert into buy VALUES (null,#{b_name},#{e_id},#{price},#{equ_vendor},#{buy_time},#{num},#{z_price})
+        insert into buy VALUES (null,#{e_id},#{b_name},#{equ_vendor},#{price},#{buy_time},#{num},#{z_price})
+    </insert>
+    <insert id="insertBuy_Equ" >
+        insert into equipment (#{id},#{equ_id},#{equ_name},#{equ_vendor},#{price})
+        select id,e_id,b_name,equ_vendor,price
+        from buy where buy.id=#{id}
     </insert>
     <update id="buyUpdate">
         update buy set

@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50610
 File Encoding         : 65001
 
-Date: 2019-04-10 16:38:03
+Date: 2019-04-14 12:01:39
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -21,27 +21,26 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `buy`;
 CREATE TABLE `buy` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `b_name` varchar(255) DEFAULT NULL COMMENT '购买设备名称',
   `e_id` varchar(255) DEFAULT NULL COMMENT '设备编号',
-  `price` bigint(11) DEFAULT NULL COMMENT '设备购买价格单价',
+  `b_name` varchar(255) DEFAULT NULL COMMENT '购买设备名称',
   `equ_vendor` varchar(255) DEFAULT NULL COMMENT '设备厂商',
+  `price` bigint(11) DEFAULT NULL COMMENT '设备购买价格单价',
   `buy_time` datetime DEFAULT NULL COMMENT '购买时间',
   `num` int(11) DEFAULT NULL COMMENT '数量',
   `z_price` bigint(20) DEFAULT NULL COMMENT '总金额',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of buy
 -- ----------------------------
-INSERT INTO `buy` VALUES ('1', '变压器', '001', '17339321220', '大的打', '2019-04-03 09:36:25', null, null);
-INSERT INTO `buy` VALUES ('2', '变频器', '2', '26211555', '大大泡泡糖', '2019-04-03 10:09:42', '33', '666');
-INSERT INTO `buy` VALUES ('8', '电机', null, '16936969696', 'va1', '2019-04-03 09:50:51', null, null);
-INSERT INTO `buy` VALUES ('11', '电脑', '002', '999996966', '万泰电子', '2019-04-03 14:12:27', null, null);
-INSERT INTO `buy` VALUES ('12', '主板', '006', '17339321220', '大同', '2019-04-03 16:37:39', null, null);
-INSERT INTO `buy` VALUES ('13', '电板', '03A26', '600', '正大瓦', '2019-04-20 00:00:00', '9', '5000');
-INSERT INTO `buy` VALUES ('14', '打赏', '0a69', '999', '的', '2019-04-10 00:00:00', '7', '666');
-INSERT INTO `buy` VALUES ('15', null, null, null, null, null, null, null);
+INSERT INTO `buy` VALUES ('1', '001', '变压器', '大的打', '17339321220', '2019-04-03 09:36:25', null, null);
+INSERT INTO `buy` VALUES ('2', '2', '变频器', '大大泡泡糖', '26211555', '2019-04-03 10:09:42', '33', '666');
+INSERT INTO `buy` VALUES ('8', null, '电机', 'va1', '16936969696', '2019-04-03 09:50:51', null, null);
+INSERT INTO `buy` VALUES ('11', '002', '电脑', '万泰电子', '999996966', '2019-04-03 14:12:27', null, null);
+INSERT INTO `buy` VALUES ('12', '006', '主板', '大同', '17339321220', '2019-04-03 16:37:39', null, null);
+INSERT INTO `buy` VALUES ('13', '03A26', '电板', '正大瓦', '600', '2019-04-20 00:00:00', '9', '5000');
+INSERT INTO `buy` VALUES ('14', '0a69', '打赏', '的', '999', '2019-04-10 00:00:00', '7', '666');
 
 -- ----------------------------
 -- Table structure for `dept`
@@ -83,7 +82,7 @@ CREATE TABLE `emp` (
 -- ----------------------------
 -- Records of emp
 -- ----------------------------
-INSERT INTO `emp` VALUES ('1', 'AE001', '万泰', '1', '2019-04-03', '男', '10000000000', '600000', '17339321220');
+INSERT INTO `emp` VALUES ('1', null, null, null, null, null, null, null, null);
 INSERT INTO `emp` VALUES ('2', 'SN001', '记者大', '2', '2019-04-15', '男', '10362.36', '326999', '16889869896');
 INSERT INTO `emp` VALUES ('3', 'CW001', '李锦记', '2', '2019-04-21', '男', '96226', '80006', '17339321220');
 INSERT INTO `emp` VALUES ('7', '366', '66', '1', '2019-04-09', '男', '6999', '564', '18639321220');
@@ -99,16 +98,18 @@ CREATE TABLE `equipment` (
   `equ_id` varchar(11) DEFAULT NULL COMMENT '设备编号',
   `equ_name` varchar(255) DEFAULT NULL COMMENT '设备名称',
   `equ_vendor` varchar(255) DEFAULT NULL COMMENT '设备厂商',
-  `other` varchar(255) DEFAULT NULL COMMENT '其他信息',
   `price` bigint(20) DEFAULT NULL COMMENT '设备价格',
+  `other` varchar(255) DEFAULT NULL COMMENT '其他信息',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of equipment
 -- ----------------------------
-INSERT INTO `equipment` VALUES ('1', '001', '发电机', '淮南万泰电子', '频率', null);
-INSERT INTO `equipment` VALUES ('2', '2', '电机', '大同集团', '66', null);
+INSERT INTO `equipment` VALUES ('1', '001', '发电机', '淮南万泰电子', '666', '频率');
+INSERT INTO `equipment` VALUES ('4', 'AC669', '汽车部件', '大众', '69666', '无');
+INSERT INTO `equipment` VALUES ('11', '002', '电脑', '万泰电子', '999996966', null);
+INSERT INTO `equipment` VALUES ('12', '006', '主板', '大同', '17339321220', null);
 
 -- ----------------------------
 -- Table structure for `equ_maintenance`
@@ -242,12 +243,13 @@ CREATE TABLE `role_power` (
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` int(11) DEFAULT NULL COMMENT '员工登陆账号',
+  `username` varchar(11) DEFAULT NULL COMMENT '员工登陆账号',
   `password` varchar(255) DEFAULT '' COMMENT '员工登陆密码',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
 INSERT INTO `user` VALUES ('12', '666', '888');
+INSERT INTO `user` VALUES ('13', 'aaa666', '369123');

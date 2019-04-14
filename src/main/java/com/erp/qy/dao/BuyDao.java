@@ -27,6 +27,13 @@ public interface BuyDao {
     int buyAdd(Map map);
 
     /**
+     * 一键导入设备表
+     * @param map
+     * @return
+     */
+    int insertBuy_Equ(Map map);
+
+    /**
      * 更新设备购买表
      * @param map
      * @return

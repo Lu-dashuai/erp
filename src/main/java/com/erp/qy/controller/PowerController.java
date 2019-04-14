@@ -34,8 +34,8 @@ public class PowerController {
     @RequestMapping("/userLogin")
     @ResponseBody
     public Object toLogin(@RequestBody Map user, Model model, HttpSession session) {
-        String username = user.get("username").toString();
-        String password = user.get("password").toString();
+        String username = user.get("username")+"";
+        String password = user.get("password")+"";
         if (username != null && !"".equals(username)) {
             //将用户放到session中
             session.setAttribute("username", username);

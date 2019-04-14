@@ -20,18 +20,27 @@
     <!--列表顶部搜索和工具条-->
     <el-row>
         <el-form :inline="true" :model="searchForm" class="demo-form-inline">
-            <el-form-item label="设备编号">
-                <el-input v-model="searchForm.equ_id" clearable placeholder="设备编号"></el-input>
-            </el-form-item>
-            <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addClick">导入</el-button>
-            <el-form-item label="员工部门">
+            <el-form-item label="设备编号导入">
                 <template>
-                    <el-select v-model="searchForm.d_name" clearable placeholder="请选择">
+                    <el-select v-model="searchForm.e_id" clearable placeholder="请选择">
                         <el-option
-                                v-for="item in options"
-                                :key="item.dept_id"
-                                :label="item.d_name"
-                                :value="item.d_name">
+                                v-for="item in optionsData"
+                                :key="item.e_id"
+                                :label="item.e_id"
+                                :value="item.e_id">
+                        </el-option>
+                    </el-select>
+                </template>
+            </el-form-item>
+            <el-button type="primary" icon="el-icon-circle-plus-outline" @click="daoClick">导入</el-button>
+            <el-form-item label="设备编号查询">
+                <template>
+                    <el-select v-model="searchForm.e_id" clearable placeholder="请选择">
+                        <el-option
+                                v-for="item in optionsData"
+                                :key="item.e_id"
+                                :label="item.e_id"
+                                :value="item.e_id">
                         </el-option>
                     </el-select>
                 </template>
@@ -134,10 +143,10 @@
         </div>
     </el-dialog>
     <!--导入界面-->
-    <el-dialog title="导入" :visible.sync="editFormVisible" :close-on-click-modal="false">
+    <el-dialog title="导入" :visible.sync="editFormVisi" :close-on-click-modal="false">
         <el-form :model="editForm" label-width="90px" :rules="editFormRules" ref="editForm" >
             <el-form-item label="设备编号">
-                <el-input v-model="optionsData.equ_id" auto-complete="off"></el-input>
+                <el-input v-model="optionsData.equ_id" auto-complete="off" ></el-input>
             </el-form-item>
             <el-form-item label="设备名称">
                 <el-input v-model="optionsData.equ_name" auto-complete="off"></el-input>
@@ -148,9 +157,7 @@
             <el-form-item label="设备厂商" >
                 <el-input v-model="optionsData.equ_vendor" auto-complete="off"></el-input>
             </el-form-item>
-            <el-form-item label="其他信息">
-                <el-input v-model="optionsData.other" auto-complete="off" tyep=""></el-input>
-            </el-form-item>
+
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click.native="editFormVisible = false">取消</el-button>
@@ -171,6 +178,7 @@
     var tableView = new Vue({
         el: '#tableView',
         data: {
+            editFormVisi:false,
             //下拉框
             optionsData:[],
             //列表数据
@@ -233,10 +241,10 @@
                 self.total=response.data.total;
                 self.tableData = response.data.pageData;
             })
-            /*axios.post('/buy/buyList').then(function (response) {
-                self.options = response.data.buyList;
-                //alert(JSON.stringify(response.data));
-            })*/
+            axios.post('/buy/getBuyList').then(function (res) {
+                self.optionsData = res.data.buyList;
+                alert(JSON.stringify(res.data.buyList));
+            })
         },
         methods:{
             //清空表格数据
@@ -286,6 +294,9 @@
                 }
                 alert("2:"+JSON.stringify(this.editForm.d_name));
                 this.loadingData();//重新加载数据
+            },
+            daoClick:function () {
+                this.editFormVisi = true;
             },
             //表格删除事件
             deleteClick:function(row) {
